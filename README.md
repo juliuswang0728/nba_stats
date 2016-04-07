@@ -7,7 +7,9 @@ The goal of this project is to discover the most possible secret sauce of nba ch
 analysing champ team's stats each year from 1991 (chicago-bulls) to 2015 (golden-state-warriors).
 
 The results and the reports will be updated soon...tentative results would be published in
-'results' directory.
+'results' directory, e.g.
+
+![alt tag](https://github.com/juliuswang0728/nba_stats/blob/master/results/1991_chicago-bulls.png)
 
 I use the following python package:
 - pandas
