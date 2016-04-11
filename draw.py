@@ -26,5 +26,10 @@ def draw_fromfiles(directory='champions/'):
     for i, filename in enumerate(filenames, 1):
         team_stats = pd.read_csv(directory + filename, index_col=0)
         team_stats.columns.name = 'Statistics'
+
+        # drop column 'PER' cuz it was not specified in year before 2003,
+        # just for consistency over statistics in all years
+        if 'PER' in team_stats.columns:
+            team_stats = team_stats.drop('PER', 1)
         #team_stats.to_csv('123.csv')
         draw_heatmap(team_stats, i, filename[0:-4])
