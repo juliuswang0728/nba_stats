@@ -17,7 +17,7 @@ def draw_heatmap(data, figure_idx, title):
     plt.xticks(rotation=90)
     plt.title(title)
     plt.tight_layout()
-    plt.savefig('champions/' + title + '.png', transparent=True, bbox_inches='tight', format='png')
+    plt.savefig('results/' + title + '.png', transparent=True, bbox_inches='tight', format='png')
     #plt.show()
     plt.clf()
 
