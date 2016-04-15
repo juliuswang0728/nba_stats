@@ -6,11 +6,13 @@ Created on Sun Mar  6 09:24:46 2016
 """
 import draw
 import crawler
+import analysis
 import numpy as np
 import pandas as pd
 
-draw.draw_fromfiles('champions/')
-#crawler.crawl_nbastats_champ_by_years(np.arange(1991, 2016))
+#draw.draw_fromfiles('champions/')
+analysis.do_analysis(directory1='champions/', directory2='non_champions/')
+#crawler.crawl_nbastats_champ_by_years(np.arange(1996, 2016))
 #crawler.crawl_nbastats(1995)
 #print OrderedDict()
 '''x = pd.read_csv('atlanta-hawks_1990.csv')

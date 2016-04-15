@@ -33,27 +33,31 @@ champions = ['chi', 'chi', 'chi', 'hou', 'hou', 'chi', 'chi', 'chi', 'sa', 'lal'
 'sa', 'det', 'sa', 'mia', 'sa', 'bos', 'lal', 'lal', 'dal', 'mia', 'mia', 'sa', 'gs']
 champions = dict(zip(champion_years, champions))
 
-def crawl_nbastats_champ_by_years(years):
+def crawl_nbastats_champ_by_years(years, num_player_of_interest=10):
     for year in years:
-        champion_teamstats = crawl_nbastats_by_year(year=year, champion_team_name=champions[year])
+        champion_teamstats = crawl_nbastats_by_year(year=year, \
+                                            champion_team_name=champions[year])
         print '---------' + str(year) + ' Champ: ' + team_abbr_full[champions[year]] + '---------'
 
         # keep the first 10 rows of players for factor analysis purpose later
-        if champion_teamstats.shape[0] >= 10:
-            champion_teamstats = champion_teamstats.iloc[0:10]
-            print champion_teamstats
+        if champion_teamstats.shape[0] >= num_player_of_interest:
+            champion_teamstats = champion_teamstats.iloc[0:num_player_of_interest]
+            #print champion_teamstats
             filename = str(year) + '_' + team_abbr_full[champions[year]] + '.csv'
             champion_teamstats.to_csv(filename)
         else:
-            print '# of players is less than 10 on year''s champ team!'
+            print 'warning (stats not saved): # of players is less than 10 on year''s champ team!'
 
-def crawl_nbastats_by_year(year, champion_team_name='dal'):
+def crawl_nbastats_by_year(year, champion_team_name='dal', num_player_of_interest=10):
     champion_team_name = team_abbr_full[champion_team_name]
     url_root = 'http://espn.go.com/nba/team/stats/_/name/'
     best_stats = []
     champion_teamstats = pd.DataFrame()
+    non_champion_teamstats = []
+    non_champion_teamlist = []
     for team_abbr, team_name in zip(teams_abbr, teams_full_name):
-        URL = url_root + team_abbr + '/year/' + str(year) + '/cat/avgMinutes/' + team_name
+        catogory = '/cat/avgMinutes/'   # ordering player with their avg. minutes
+        URL = url_root + team_abbr + '/year/' + str(year) + category + team_name
         print 'parsing ' + URL + ' ...'
         request = urllib2.Request(URL)
         response = urllib2.urlopen(request)
@@ -86,6 +90,12 @@ def crawl_nbastats_by_year(year, champion_team_name='dal'):
             team_stats[stat.get_text()] = 0.0
 
         numOfPlayer = len(players) / 2
+
+        # teams with players fewer than 10 are not included in the study
+        if numOfPlayer < num_player_of_interest:
+            print 'warning: players less than ' + str(num_player_of_interest) + ' !'
+            continue
+
         player_namelist = []
         for i, player in enumerate(players, 0):
             if i == numOfPlayer:
@@ -112,12 +122,14 @@ def crawl_nbastats_by_year(year, champion_team_name='dal'):
         print 'saving ' + filename, ' ...'
         team_stats.to_csv(filename)'''
 
-        # only keep track of champion team with specified year
+        # keep track of champion team with specified year
+        team_stats.index.name = 'Players'
+        team_stats.columns.name = 'Statistics'
         if team_name == champion_team_name:
-            team_stats.index.name = 'Players'
-            team_stats.columns.name = 'Statistics'
             champion_teamstats = team_stats
-
+        else:
+            non_champion_teamstats.append(team_stats)
+            non_champion_teamlist.append(team_name)
         # keep track of the best of each statistics
         if len(best_stats) == 0:
             best_stats = team_stats.max(axis=0, numeric_only=True).as_matrix()
@@ -130,5 +142,11 @@ def crawl_nbastats_by_year(year, champion_team_name='dal'):
     # normalise the stats by dividing the champion team's stats by the best stats among all teams
     if (not champion_teamstats.empty) and (len(best_stats) != 0):
         champion_teamstats = champion_teamstats.loc[:, 'GP'::].divide(best_stats, axis='columns')
+
+    for team_stat, team_name in zip(non_champion_teamstats, non_champion_teamlist):
+        team_stat = team_stat.loc[:, 'GP'::].divide(best_stats, axis='columns')
+        team_stat = team_stat.iloc[0:num_player_of_interest]
+        filename = 'non_champions/' + str(year) + '_' + team_name + '.csv'
+        team_stat.to_csv(filename)
 
     return champion_teamstats
