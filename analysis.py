@@ -120,14 +120,15 @@ def do_analysis(directory1='champions/', directory2='non_champions/',alg='nmf'):
         all_team_sauce = tsne_model.fit_transform(np.concatenate((champs_sauce, non_champs_sauce), axis=0))
         fig, ax = plt.subplots()
         ax.plot(all_team_sauce[0:len(champs_sauce), 0], all_team_sauce[0:len(champs_sauce), 1], \
-                'ro', alpha=1.0, label='champions', markersize=20)
+                'ro', alpha=1.0, label='champions', markersize=12)
         ax.plot(all_team_sauce[len(champs_sauce)::, 0], \
-                all_team_sauce[len(champs_sauce)::, 1], 'bo', alpha=0.25, label='non-champions', markersize=20)
+                all_team_sauce[len(champs_sauce)::, 1], 'bo', alpha=0.25, label='non-champions', markersize=12)
 
         for year, x in enumerate(all_team_sauce[0:len(champs), :], 1991):
             ax.annotate(str(year), (x[0]+0.2, x[1]+0.2), color=[0.2, 0.2, 0.2], fontsize=16)
         plt.title('Visualising team (1991-2015) statistics with t-SNE \n')
         plt.legend(fontsize=16)
+        plt.savefig('results/tsne_1991_2015_result.png', transparent=True, bbox_inches='tight')
         #plt.show()
         print 'Visualising with tsne...finished!'
 
